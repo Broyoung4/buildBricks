@@ -1,0 +1,82 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+@import "nativewind/theme";
+
+@theme {
+  --color-brand-primary: #006241;
+  --color-brand-sky: #007fff;
+  --color-brand-deep: #00374f;
+  --color-brand-orange: #ee7400;
+
+  --color-semantic-success: #289477;
+  --color-semantic-warning: #ffc600;
+  --color-semantic-streak: #ffd687;
+  --color-semantic-error: #d02c2c;
+  --color-semantic-info: #36dfff;
+
+  --color-neutral-primary: #122428;
+  --color-neutral-secondary: #55626a;
+  --color-neutral-border: #f0f1f3;
+  --color-neutral-surface: #f6f7fa;
+  --color-neutral-background: #ffffff;
+  --color-neutral-page: #f3f2f0;
+
+  --color-onboarding-background: #f6f8f6;
+  --color-onboarding-logo-tile: #e7f1e9;
+  --color-onboarding-logo-title: #1d2a23;
+  --color-onboarding-tagline: #7c8982;
+  --color-onboarding-country-border: #dde7e0;
+  --color-onboarding-country-text: #46755d;
+  --color-onboarding-badge-background: #e7f0e9;
+  --color-onboarding-badge-text: #287c57;
+  --color-onboarding-title: #18241e;
+  --color-onboarding-body: #7a8880;
+  --color-onboarding-section-title: #29362f;
+  --color-onboarding-helper-text: #87938c;
+  --color-onboarding-selected-border: #2b805a;
+  --color-onboarding-selected-background: #f2f8f4;
+  --color-onboarding-card-border: #e5ebe7;
+  --color-onboarding-card-background: #ffffff;
+  --color-onboarding-selected-icon-background: #dfeee4;
+  --color-onboarding-icon-background: #f1f3f2;
+  --color-onboarding-selected-icon: #267a55;
+  --color-onboarding-icon: #728078;
+  --color-onboarding-role-title: #2b3831;
+  --color-onboarding-role-description: #829087;
+  --color-onboarding-selected-indicator: #287c57;
+  --color-onboarding-indicator-border: #d6dfd9;
+  --color-onboarding-action-background: #17251e;
+  --color-onboarding-action-text: #ffffff;
+  --color-onboarding-auth-action: #287c57;
+  --color-onboarding-divider: #e1e8e3;
+
+  --font-sans: "Plus Jakarta Sans";
+  --font-brand: "Plus Jakarta Sans";
+  --font-brand-medium: "Plus Jakarta Sans Medium";
+  --font-brand-semibold: "Plus Jakarta Sans SemiBold";
+  --font-brand-bold: "Plus Jakarta Sans Bold";
+}
+
+:root {
+  --font-heading: "Plus Jakarta Sans";
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@layer components {
+  .design-surface {
+    border-width: 1px;
+    border-color: #e4e7ea;
+    border-radius: 22px;
+    background-color: #f9f9f8;
+  }
+
+  .brand-label {
+    font-family: "Plus Jakarta Sans SemiBold";
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+}
