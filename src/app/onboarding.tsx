@@ -2,13 +2,7 @@ import { Image } from "expo-image";
 import { StatusBar } from "expo-status-bar";
 import { styled } from "nativewind";
 import { useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { images } from "../constants/images";
 
@@ -178,21 +172,34 @@ export default function Onboarding() {
               })}
             </View>
 
-            <View className="mt-4 min-h-[52px] items-center justify-center rounded-[11px] bg-onboarding-action-background">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ disabled: true }}
+              accessibilityLabel={`Create ${selectedRole === "skilled-pro" ? "skilled pro" : selectedRole} account, coming soon`}
+              disabled
+              className="mt-4 min-h-[52px] items-center justify-center rounded-[11px] bg-onboarding-action-background"
+            >
               <Text className="font-brand-semibold text-[13px] leading-5 text-onboarding-action-text">
                 Create{" "}
                 {selectedRole === "skilled-pro" ? "skilled pro" : selectedRole}{" "}
                 account
               </Text>
-            </View>
+            </Pressable>
 
             <View className="mt-3 flex-row items-center justify-center gap-3">
               <Text className="font-brand text-[11px] leading-[17px] text-onboarding-role-description">
                 Already have an account?
               </Text>
-              <Text className="font-brand-semibold text-[11px] leading-[17px] text-onboarding-auth-action">
-                Sign in
-              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: true }}
+                accessibilityLabel="Sign in, coming soon"
+                disabled
+              >
+                <Text className="font-brand-semibold text-[11px] leading-[17px] text-onboarding-auth-action">
+                  Sign in (coming soon)
+                </Text>
+              </Pressable>
             </View>
 
             <View className="mx-1 mt-5 h-px bg-onboarding-divider" />
