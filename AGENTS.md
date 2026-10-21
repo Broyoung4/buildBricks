@@ -241,7 +241,7 @@ Do not install or use new libraries without user approval.
 Use this structure unless there is a strong reason to change it:
 
 ```txt
-app/
+src/app/
   (auth)/
   (tabs)/
   lesson/
