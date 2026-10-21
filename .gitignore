@@ -41,3 +41,16 @@ example
 # generated native folders
 /ios
 /android
+
+#agents
+.agents/
+
+buildbricks_designSystem/
+
+prompt_material/
+
+prompts/
+
+buildbricks assets/
+
+AGENTS.md
