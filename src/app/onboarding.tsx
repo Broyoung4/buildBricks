@@ -1,5 +1,6 @@
+import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { styled } from "nativewind";
 import { useState } from "react";
@@ -51,6 +52,15 @@ const roles: {
 
 export default function Onboarding() {
   const [selectedRole, setSelectedRole] = useState<UserRole>("buyer");
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return null;
+  }
+
+  if (isSignedIn) {
+    return <Redirect href="/" />;
+  }
 
   return (
     <View className="flex-1 bg-onboarding-background">
@@ -198,6 +208,7 @@ export default function Onboarding() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Sign in"
+                className="min-h-11 justify-center px-1"
                 onPress={() =>
                   router.push({
                     pathname: "/sign-in",

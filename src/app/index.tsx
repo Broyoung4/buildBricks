@@ -1,51 +1,58 @@
-import { ScrollView, Text, View } from "react-native";
-import { Link } from "expo-router";
-import { themeColors } from "../theme";
-import { AppButton, AppCard, AppHeading } from "../components/ui";
-
-const primaryColors = [
-  { name: "Build Green", hex: themeColors.brand.primary },
-  { name: "Sky Blue", hex: themeColors.brand.sky },
-  { name: "Deep Sea", hex: themeColors.brand.deep },
-  { name: "Orange", hex: themeColors.brand.orange },
-];
-
-const semanticColors = [
-  { name: "Success", hex: themeColors.semantic.success },
-  { name: "Warning", hex: themeColors.semantic.warning },
-  { name: "Streak", hex: themeColors.semantic.streak },
-  { name: "Error", hex: themeColors.semantic.error },
-  { name: "Info", hex: themeColors.semantic.info },
-];
-
-const neutralColors = [
-  { name: "Text / Primary", hex: themeColors.neutral.text.primary },
-  { name: "Text / Secondary", hex: themeColors.neutral.text.secondary },
-  { name: "Border", hex: themeColors.neutral.border },
-  { name: "Surface", hex: themeColors.neutral.surface },
-  { name: "Background", hex: themeColors.neutral.background },
-];
-
-const font = {
-  regular: "Plus Jakarta Sans",
-  medium: "Plus Jakarta Sans Medium",
-  semibold: "Plus Jakarta Sans SemiBold",
-  bold: "Plus Jakarta Sans Bold",
-};
+import { useAuth, useClerk, useUser } from "@clerk/expo";
+import { Redirect, router } from "expo-router";
+import { Pressable, Text, View } from "react-native";
 
 export default function Index() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const { signOut } = useClerk();
+  const { user } = useUser();
+
+  if (!isLoaded) {
+    return null;
+  }
+
+  if (!isSignedIn) {
+    return <Redirect href="/onboarding" />;
+  }
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.replace("/onboarding");
+  };
+
+  const displayName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress || "there";
+
   return (
-    <ScrollView className="flex-1 bg-[#F3F2F0]">
-      <View className="p-4">
-        <AppHeading level={1} className="text-2xl font-bold text-primary">
-          BUILDBRICKS
-        </AppHeading>
-        <Link href="/onboarding" asChild>
-          <AppButton className="mt-4" accessibilityLabel="Open onboarding">
-            Get started with BuildBricks
-          </AppButton>
-        </Link>
+    <View className="flex-1 bg-[#F6F8F6] px-[9%] pb-8 pt-7">
+      <View className="mt-6 rounded-[22px] border border-[#DDE7E0] bg-white p-5 shadow-sm">
+        <Text className="font-brand-semibold text-[11px] uppercase tracking-[1.4px] text-[#287C57]">
+          BuildBricks
+        </Text>
+        <Text className="mt-3 font-brand-bold text-[30px] leading-[38px] text-[#29362F]">
+          Welcome back, {displayName}
+        </Text>
+        <Text className="mt-2 font-brand text-[14px] leading-[23px] text-[#65736B]">
+          Your workspace is ready. Continue planning materials, comparing sellers, and managing your build.
+        </Text>
+
+        <View className="mt-6 rounded-[16px] bg-[#EEF7F0] p-4">
+          <Text className="font-brand-semibold text-[12px] uppercase tracking-[1.2px] text-[#287C57]">
+            Account status
+          </Text>
+          <Text className="mt-2 font-brand text-[15px] leading-[22px] text-[#29362F]">
+            Signed in and ready to continue.
+          </Text>
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Sign out"
+          onPress={() => void handleSignOut()}
+          className="mt-6 min-h-[52px] items-center justify-center rounded-[12px] bg-[#28745A]"
+        >
+          <Text className="font-brand-semibold text-[15px] leading-5 text-white">Sign out</Text>
+        </Pressable>
       </View>
-    </ScrollView>
+    </View>
   );
 }
