@@ -1,4 +1,6 @@
+import { useAuth } from "@clerk/expo";
 import { Image } from "expo-image";
+import { Redirect, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { styled } from "nativewind";
 import { useState } from "react";
@@ -50,6 +52,15 @@ const roles: {
 
 export default function Onboarding() {
   const [selectedRole, setSelectedRole] = useState<UserRole>("buyer");
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return null;
+  }
+
+  if (isSignedIn) {
+    return <Redirect href="/" />;
+  }
 
   return (
     <View className="flex-1 bg-onboarding-background">
@@ -174,9 +185,13 @@ export default function Onboarding() {
 
             <Pressable
               accessibilityRole="button"
-              accessibilityState={{ disabled: true }}
-              accessibilityLabel={`Create ${selectedRole === "skilled-pro" ? "skilled pro" : selectedRole} account, coming soon`}
-              disabled
+              accessibilityLabel={`Create ${selectedRole === "skilled-pro" ? "skilled pro" : selectedRole} account`}
+              onPress={() =>
+                router.push({
+                  pathname: "/sign-up",
+                  params: { role: selectedRole },
+                })
+              }
               className="mt-4 min-h-[52px] items-center justify-center rounded-[11px] bg-onboarding-action-background"
             >
               <Text className="font-brand-semibold text-[13px] leading-5 text-onboarding-action-text">
@@ -192,12 +207,17 @@ export default function Onboarding() {
               </Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityState={{ disabled: true }}
-                accessibilityLabel="Sign in, coming soon"
-                disabled
+                accessibilityLabel="Sign in"
+                className="min-h-11 justify-center px-1"
+                onPress={() =>
+                  router.push({
+                    pathname: "/sign-in",
+                    params: { role: selectedRole },
+                  })
+                }
               >
                 <Text className="font-brand-semibold text-[11px] leading-[17px] text-onboarding-auth-action">
-                  Sign in (coming soon)
+                  Sign in
                 </Text>
               </Pressable>
             </View>
