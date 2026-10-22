@@ -83,6 +83,7 @@ export function AuthScreen({ mode, role }: AuthScreenProps) {
   const [verificationCode, setVerificationCode] = useState("");
   const [verificationError, setVerificationError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const normalizedRole = Array.isArray(role) ? role[0] : role;
   const roleLabel = normalizedRole && isUserRole(normalizedRole) ? roleLabels[normalizedRole] : undefined;
   const isSignUp = mode === "sign-up";
@@ -121,59 +122,79 @@ export function AuthScreen({ mode, role }: AuthScreenProps) {
   };
 
   const handleSubmit = async () => {
-    const trimmedEmail = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      setEmailError("Enter a valid email address to continue.");
+    if (isSubmitting) {
       return;
     }
 
-    clearErrors();
-
-    if (!password.trim()) {
-      setPasswordError(isSignUp ? "Create a password to continue." : "Enter your password to continue.");
-      return;
-    }
-
-    if (isSignUp) {
-      if (!isValidSignUpPassword(password)) {
-        setPasswordError(
-          "Use at least 8 characters, including an uppercase letter, a number, and a special character.",
-        );
+    setIsSubmitting(true);
+    try {
+      const trimmedEmail = email.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+        setEmailError("Enter a valid email address to continue.");
         return;
       }
 
-      const result = await signUp.create({ emailAddress: trimmedEmail, password });
+      clearErrors();
+
+      if (!password.trim()) {
+        setPasswordError(isSignUp ? "Create a password to continue." : "Enter your password to continue.");
+        return;
+      }
+
+      if (isSignUp) {
+        if (!isValidSignUpPassword(password)) {
+          setPasswordError(
+            "Use at least 8 characters, including an uppercase letter, a number, and a special character.",
+          );
+          return;
+        }
+
+        const result = await signUp.create({ emailAddress: trimmedEmail, password });
+        if (result.error) {
+          setEmailError(getErrorMessage(result.error, "Unable to create your account. Please try again."));
+          return;
+        }
+
+        const verificationResult = await signUp.verifications.sendEmailCode();
+        if (verificationResult.error) {
+          setEmailError(getErrorMessage(verificationResult.error, "Unable to send the verification code."));
+          return;
+        }
+
+        setVerificationCode("");
+        setIsVerificationVisible(true);
+        return;
+      }
+
+      const result = await signIn.password({ emailAddress: trimmedEmail, password });
       if (result.error) {
-        setEmailError(getErrorMessage(result.error, "Unable to create your account. Please try again."));
+        const message = getErrorMessage(result.error, "Incorrect email or password.");
+        setPasswordError(message);
         return;
       }
 
-      const verificationResult = await signUp.verifications.sendEmailCode();
-      if (verificationResult.error) {
-        setEmailError(getErrorMessage(verificationResult.error, "Unable to send the verification code."));
+      if (signIn.status === "complete") {
+        await signIn.finalize({ navigate: navigateAfterAuth });
         return;
       }
 
-      setVerificationCode("");
-      setIsVerificationVisible(true);
-      return;
-    }
-
-    const result = await signIn.password({ emailAddress: trimmedEmail, password });
-    if (result.error) {
-      const message = getErrorMessage(result.error, "Incorrect email or password.");
-      setEmailError(message);
-      setPasswordError(message);
-      return;
-    }
-
-    if (signIn.status === "complete") {
-      await signIn.finalize({ navigate: navigateAfterAuth });
-      return;
-    }
-
-    if (signIn.status === "needs_second_factor") {
-      setPasswordError("Additional verification is required before you can continue.");
+      if (signIn.status === "needs_second_factor") {
+        setPasswordError("Additional verification is required before you can continue.");
+        return;
+      }
+      setPasswordError("Unable to complete sign-in. Please try again.");
+    } catch (error) {
+      const fallback = isSignUp
+        ? "Unable to create your account. Please try again."
+        : "Unable to sign in. Please check your connection and try again.";
+      const message = getErrorMessage(error, fallback);
+      if (isSignUp) {
+        setEmailError(message);
+      } else {
+        setPasswordError(message);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -253,7 +274,7 @@ export function AuthScreen({ mode, role }: AuthScreenProps) {
 
   const switchMode = () => {
     const params = normalizedRole && isUserRole(normalizedRole) ? { role: normalizedRole } : undefined;
-    router.push(isSignUp ? { pathname: "/sign-in", params } : { pathname: "/sign-up", params });
+    router.replace(isSignUp ? { pathname: "/sign-in", params } : { pathname: "/sign-up", params });
   };
 
   const authButtonText = isSignUp ? "Create account" : "Sign in";
@@ -423,12 +444,12 @@ export function AuthScreen({ mode, role }: AuthScreenProps) {
                   {emailError}
                 </Text>
               ) : null}
-              {signInErrors && signInErrors?.fields?.identifier ? (
+              {signInErrors && signInErrors?.fields?.identifier && signInErrors.fields.identifier.message !== passwordError && signInErrors.fields.identifier.message !== emailError ? (
                 <Text accessibilityRole="alert" className="mt-2 font-brand text-[12px] leading-[18px] text-[#B42318]">
                   {signInErrors.fields.identifier.message}
                 </Text>
               ) : null}
-              {signUpErrors && signUpErrors?.fields?.emailAddress ? (
+              {signUpErrors && signUpErrors?.fields?.emailAddress && signUpErrors.fields.emailAddress.message !== emailError ? (
                 <Text accessibilityRole="alert" className="mt-2 font-brand text-[12px] leading-[18px] text-[#B42318]">
                   {signUpErrors.fields.emailAddress.message}
                 </Text>
@@ -438,9 +459,11 @@ export function AuthScreen({ mode, role }: AuthScreenProps) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={authButtonText}
-              className="mt-6 min-h-[58px] items-center justify-center rounded-[13px] bg-[#28745A] active:bg-[#1F624B]"
+              className={`mt-6 min-h-[58px] items-center justify-center rounded-[13px] bg-[#28745A] active:bg-[#1F624B] ${
+                isSubmitting ? "opacity-60" : ""
+              }`}
               onPress={() => void handleSubmit()}
-              disabled={!isLoaded}
+              disabled={!isLoaded || isSubmitting}
             >
               <Text className="font-brand-semibold text-[15px] leading-5 text-white">
                 {authButtonText}
